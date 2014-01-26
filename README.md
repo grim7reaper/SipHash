@@ -62,4 +62,4 @@ J.-P. Aumasson and D. J. Bernstein,
 
 This software is licensed under the BSD3 license.
 
-© 2013-2014 Sylvain Laperche <sylvain.laperche@gmail.com>.
+© 2014 Sylvain Laperche <sylvain.laperche@gmail.com>.
