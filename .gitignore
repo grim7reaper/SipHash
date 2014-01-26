@@ -1,0 +1,6 @@
+# Ignore object files.
+obj/
+# Ignore executables.
+bin/
+# Ignore Vim swap files
+*.swp
