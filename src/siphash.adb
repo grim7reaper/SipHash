@@ -47,8 +47,8 @@ package body SipHash is
      return U64 is
       Nb_Blocks : constant I64 := I64(Input'Length / Block_Size);
       -- Initialization --
-      K0 : U64 := To_U64_LE(Key(1..8));
-      K1 : U64 := To_U64_LE(Key(9..16));
+      K0 : U64 := Pack_As_LE(Key(1..8));
+      K1 : U64 := Pack_As_LE(Key(9..16));
       V0 : U64 := K0 xor 16#736f6d6570736575#;
       V1 : U64 := K1 xor 16#646f72616e646f6d#;
       V2 : U64 := K0 xor 16#6c7967656e657261#;
@@ -59,7 +59,7 @@ package body SipHash is
          declare
             Start : U64 := Input'First + U64(I)*U64(Block_Size);
             Stop  : U64 := Start + U64(Block_Size)-1;
-            Block : U64 := To_U64_LE(Input(Start..Stop));
+            Block : U64 := Pack_As_LE(Input(Start..Stop));
          begin
             V3 := V3 xor Block;
             Sip_Round(V0, V1, V2, V3);
@@ -94,23 +94,20 @@ package body SipHash is
    end SipHash_24;
 
    ---------------------------------------------------------------------
-   -- To_U64_LE
-   --
-   -- Implementation Notes:
-   --   Input'First is used as offset in order to allow To_U64_LE to be
-   --   called with an array's slice as argument.
+   -- Pack_As_LE
    ---------------------------------------------------------------------
-   function To_U64_LE(Input : in Byte_Sequence) return U64 is
+   function Pack_As_LE(Input : in U64_Unpacked)
+     return U64 is
    begin
-      return           U64(Input(Input'First    ))      or
-            Shift_Left(U64(Input(Input'First + 1)),  8) or
-            Shift_Left(U64(Input(Input'First + 2)), 16) or
-            Shift_Left(U64(Input(Input'First + 3)), 24) or
-            Shift_Left(U64(Input(Input'First + 4)), 32) or
-            Shift_Left(U64(Input(Input'First + 5)), 40) or
-            Shift_Left(U64(Input(Input'First + 6)), 48) or
-            Shift_Left(U64(Input(Input'First + 7)), 56);
-   end To_U64_LE;
+      return           U64(Input(1))      or
+            Shift_Left(U64(Input(2)),  8) or
+            Shift_Left(U64(Input(3)), 16) or
+            Shift_Left(U64(Input(4)), 24) or
+            Shift_Left(U64(Input(5)), 32) or
+            Shift_Left(U64(Input(6)), 40) or
+            Shift_Left(U64(Input(7)), 48) or
+            Shift_Left(U64(Input(8)), 56);
+   end Pack_As_LE;
 
    ---------------------------------------------------------------------
    -- Sip_Round

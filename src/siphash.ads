@@ -63,7 +63,7 @@ package SipHash is
       Patch : Natural;
    end record;
 
-   Version : constant Version_Type := (0, 1, 0);
+   Version : constant Version_Type := (0, 1, 1);
 
    type I64 is new Interfaces.Integer_64;
    type U64 is new Interfaces.Unsigned_64;
@@ -93,9 +93,11 @@ package SipHash is
 private
    -- A block of 64 bits contains 8 octets.
    Block_Size : constant U8 := 8;
+   -- An unpacked 64-bit integer correspond to a sequence of 8 bytes.
+   subtype U64_Unpacked is Byte_Sequence (U64 range 1..8);
 
    ---------------------------------------------------------------------
-   -- To_U64_LE
+   -- Pack_As_LE
    --
    -- Purpose:
    --   Converts an 8-bit sequence into a little-endian 64-bit word.
@@ -106,7 +108,7 @@ private
    -- Exceptions:
    --   None.
    ---------------------------------------------------------------------
-   function To_U64_LE(Input : in Byte_Sequence)
+   function Pack_As_LE(Input : in U64_Unpacked)
      return U64
      with Inline;
 
