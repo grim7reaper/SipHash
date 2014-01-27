@@ -36,14 +36,74 @@
 --   This package provides an implementation of SipHash-2-4.
 ------------------------------------------------------------------------
 package SipHash.SipHash24 is
+   type Object is limited private;
+
+   ---------------------------------------------------------------------
+   -- Initialize
+   --
+   -- Purpose:
+   --   Creates a SipHash-2-4 instance, initialized with the specified
+   --   128-bit secret key.
+   -- Parameters:
+   --   Key: a 128-bit secret key.
+   -- Return:
+   --   Returns an initialized SipHash-2-4 instance.
+   -- Exceptions:
+   --   None.
+   ---------------------------------------------------------------------
+   function Initialize(Key : in Key_Type)
+     return Object;
+
+   ---------------------------------------------------------------------
+   -- Update
+   --
+   -- Purpose:
+   --   Add a byte to the hash.
+   -- Parameters:
+   --   Hash: a SipHash-2-4 instance.
+   --   Byte: a byte of data.
+   -- Exceptions:
+   --   None.
+   ---------------------------------------------------------------------
+   procedure Update(Hash : in out Object; Byte : in U8);
+
+   ---------------------------------------------------------------------
+   -- Finalize
+   --
+   -- Purpose:
+   --   Runs the finalization round and computes the hash value.
+   -- Parameters:
+   --   Hash:   a SipHash-2-4 instance.
+   --   Result: the hash value.
+   -- Exceptions:
+   --   None.
+   -- Remarks:
+   --   You MUST call Reset before calling Update again.
+   ---------------------------------------------------------------------
+   procedure Finalize(Hash : in out Object; Result : out U64);
+
+   ---------------------------------------------------------------------
+   -- Reset
+   --
+   -- Purpose:
+   --   Re-Initializes the internal state.
+   -- Parameters:
+   --   Hash: a SipHash-2-4 instance.
+   --   Key:  a 128-bit secret key.
+   -- Remarks:
+   --   The current state is lost.
+   ---------------------------------------------------------------------
+   procedure Reset(Hash : in out Object; Key : in Key_Type);
+
    ---------------------------------------------------------------------
    -- Hash
    --
    -- Purpose:
-   --   Computes the hash of the input using the specified 128-bit key.
+   --   Computes the hash of the input using the specified 128-bit
+   --   secret key.
    -- Parameters:
    --   Input: data to hash.
-   --   Key:   a 128-bit key.
+   --   Key:   a 128-bit secret key.
    -- Return:
    --   Returns the hash value.
    -- Exceptions:
@@ -51,4 +111,21 @@ package SipHash.SipHash24 is
    ---------------------------------------------------------------------
    function Hash(Input : in Byte_Sequence; Key : in Key_Type)
      return U64;
+
+private
+
+   type Object is limited
+      record
+         -- Interneal state.
+         V0          : U64;
+         V1          : U64;
+         V2          : U64;
+         V3          : U64;
+         -- Current block.
+         Block       : U64;
+         -- Position in the current block.
+         Block_Index : U8;
+         -- Processed bytes' counter (modulo 256)
+         Count       : U8;
+      end record;
 end SipHash.SipHash24;
