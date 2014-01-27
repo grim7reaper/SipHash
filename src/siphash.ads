@@ -72,6 +72,19 @@ package SipHash is
    -- A key is composed of 16 bytes (128 bits).
    subtype Key_Type is Byte_Sequence (U64 range 1..16);
 
+   ---------------------------------------------------------------------
+   -- Version_String
+   --
+   -- Purpose:
+   --   Converts the version number to a string suitable for output.
+   -- Return:
+   --   Returns the version number, as a string suitable for output.
+   -- Exceptions:
+   --   None.
+   ---------------------------------------------------------------------
+   function Version_String
+     return String;
+
 private
    -- A block of 64 bits contains 8 octets.
    Block_Size : constant U8 := 8;

@@ -192,6 +192,7 @@ procedure SipHash_Tests is
 
    Status : Boolean := True;
 begin
+   T_IO.Put_Line("SipHash v" & SipHash.Version_String);
    Status := Status and Test_Paper;
    Status := Status and Test_Empty_Input;
    Status := Status and Test_Reference_Implementation;

@@ -40,6 +40,23 @@
 ------------------------------------------------------------------------
 package body SipHash is
    ---------------------------------------------------------------------
+   -- Version_String
+   -- Implementation Notes:
+   --   Trims the leading space from of the string returned by
+   --   Natural'Image.
+   ---------------------------------------------------------------------
+   function Version_String
+     return String is
+      Major : constant String := Natural'Image(Version.Major);
+      Minor : constant String := Natural'Image(Version.Minor);
+      Patch : constant String := Natural'Image(Version.Patch);
+   begin
+      return Major(2..Major'Last) & '.' &
+             Minor(2..Minor'Last) & '.' & 
+             Patch(2..Patch'Last);
+   end Version_String;
+
+   ---------------------------------------------------------------------
    -- Pack_As_LE
    ---------------------------------------------------------------------
    function Pack_As_LE(Input : in U64_Unpacked)
