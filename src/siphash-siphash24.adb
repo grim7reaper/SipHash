@@ -59,18 +59,18 @@ package body SipHash.SipHash24 is
    --   `Block` is processed and then cleared.
    ---------------------------------------------------------------------
    procedure Update(Hash: in out Object; Byte : in U8) is
-      Offset : U8 := Hash.Block_Index * Block_Size;
+      Offset : U8 := (Hash.Block_Index - 1) * Block_Size;
    begin
       Hash.Block := Hash.Block or Shift_Left(U64(Byte), Integer(Offset));
       Hash.Count := Hash.Count + 1;
       Hash.Block_Index := Hash.Block_Index + 1;
-      if Hash.Block_Index = Block_Size then
+      if Hash.Block_Index > Block_Size then
          Hash.V3 := Hash.V3 xor Hash.Block;
          Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
          Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
          Hash.V0 := Hash.V0 xor Hash.Block;
          Hash.Block       := 0;
-         Hash.Block_Index := 0;
+         Hash.Block_Index := 1;
       end if;
    end Update;
 
@@ -80,7 +80,7 @@ package body SipHash.SipHash24 is
    --   This procedure executes the following operations:
    --   1. Padding of the last block with null bytes.
    --   2. Encoding of the number of bytes hashed (modulo 256) in the
-   --      last byte of the block.
+   --      last (leftmost) byte of the block.
    --   3. Executing the finalization round.
    --   4. Computing the hash value.
    ---------------------------------------------------------------------
@@ -111,7 +111,7 @@ package body SipHash.SipHash24 is
       Hash.V2 := K0 xor 16#6c7967656e657261#;
       Hash.V3 := K1 xor 16#7465646279746573#;
       Hash.Block       := 0;
-      Hash.Block_Index := 0;
+      Hash.Block_Index := 1;
       Hash.Count       := 0;
    end Reset;
 
