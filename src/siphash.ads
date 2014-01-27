@@ -60,7 +60,7 @@ package SipHash is
       Patch : Natural;
    end record;
 
-   Version : constant Version_Type := (0, 1, 1);
+   Version : constant Version_Type := (0, 2, 0);
 
    -- Fixed-width integer types.
    type I64 is new Interfaces.Integer_64;

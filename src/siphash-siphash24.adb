@@ -120,51 +120,13 @@ package body SipHash.SipHash24 is
    ---------------------------------------------------------------------
    function Hash(Input : in Byte_Sequence; Key : in Key_Type)
      return U64 is
-      Nb_Blocks : constant I64 := I64(Input'Length / Block_Size);
-      -- Initialization --
-      K0 : U64 := Pack_As_LE(Key(1..8));
-      K1 : U64 := Pack_As_LE(Key(9..16));
-      V0 : U64 := K0 xor 16#736f6d6570736575#;
-      V1 : U64 := K1 xor 16#646f72616e646f6d#;
-      V2 : U64 := K0 xor 16#6c7967656e657261#;
-      V3 : U64 := K1 xor 16#7465646279746573#;
+      Hash : Object := Initialize(Key);
+      Result : U64;
    begin
-      -- Compression --
-      for I in 0 .. Nb_Blocks-1 loop
-         declare
-            Start : U64 := Input'First + U64(I)*U64(Block_Size);
-            Stop  : U64 := Start + U64(Block_Size)-1;
-            Block : U64 := Pack_As_LE(Input(Start..Stop));
-         begin
-            V3 := V3 xor Block;
-            Sip_Round(V0, V1, V2, V3);
-            Sip_Round(V0, V1, V2, V3);
-            V0 := V0 xor Block;
-         end;
+      for I in Input'Range loop
+         Update(Hash, Input(I));
       end loop;
-      declare -- Process the last block.
-         Last_Block_Size : constant U64 := Input'Length and 7;
-         Block : U64 := Shift_Left(Input'Length, 56);
-      begin
-         for I in 1 .. Last_Block_Size loop
-            declare
-               Index : U64 := Input'Last-Last_Block_Size+I;
-            begin
-               Block := Block or Rotate_Left(U64(Input(Index)),
-                                             Integer(I-1) * 8);
-            end;
-         end loop;
-         V3 := V3 xor Block;
-         Sip_Round(V0, V1, V2, V3);
-         Sip_Round(V0, V1, V2, V3);
-         V0 := V0 xor Block;
-      end;
-      -- Finalization --
-      V2 := V2 xor 16#ff#;
-      Sip_Round(V0, V1, V2, V3);
-      Sip_Round(V0, V1, V2, V3);
-      Sip_Round(V0, V1, V2, V3);
-      Sip_Round(V0, V1, V2, V3);
-      return V0 xor V1 xor V2 xor V3;
+      Finalize(Hash, Result);
+      return Result;
    end Hash;
 end SipHash.SipHash24;
