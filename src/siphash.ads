@@ -34,7 +34,8 @@ with Interfaces;
 -- SipHash
 --
 -- Purpose:
---   This package implements the SipHash-2-4 algorithm.
+--   This package defines types and constants required to implement the
+--   SipHash PRF.
 --
 --   SipHash is a family of pseudorandom functions (a.k.a. keyed hash
 --   functions) optimized for speed on short messages.
@@ -48,13 +49,9 @@ with Interfaces;
 --     non-cryptographic algorithms (e.g. MurmurHash).
 --   Source: https://131002.net/siphash/
 --
--- Effects:
---   The expected usage is to call SipHash_24 with your input data and a
---   128-bit key to compute the hash value.
---
 -- References:
---   [1]J.-P. Aumasson and D. J. Bernstein, “SipHash: a fast short-input
---      PRF.” 18-Sep-2012.
+--   [1]J.-P. Aumasson and D. J. Bernstein, "SipHash: a fast short-input
+--      PRF." 18-Sep-2012.
 ------------------------------------------------------------------------
 package SipHash is
    type Version_Type is record
@@ -65,46 +62,31 @@ package SipHash is
 
    Version : constant Version_Type := (0, 1, 1);
 
+   -- Fixed-width integer types.
    type I64 is new Interfaces.Integer_64;
    type U64 is new Interfaces.Unsigned_64;
    type U8  is new Interfaces.Unsigned_8;
 
-   -- A sequence of 8-bit byte.
+   -- A sequence of 8-bit bytes.
    type Byte_Sequence is array(U64 range <>) of U8;
-   -- A SipHash key is composed of 16 bytes (128 bits).
+   -- A key is composed of 16 bytes (128 bits).
    subtype Key_Type is Byte_Sequence (U64 range 1..16);
-
-   ---------------------------------------------------------------------
-   -- SipHash_24
-   --
-   -- Purpose:
-   --   Computes the hash of the input using the specified 128-bit key.
-   -- Parameters:
-   --   Input: data to hash.
-   --   Key:   a 128-bit key.
-   -- Return:
-   --   Returns the hash value.
-   -- Exceptions:
-   --   None.
-   ---------------------------------------------------------------------
-   function SipHash_24(Input : in Byte_Sequence; Key : in Key_Type)
-     return U64;
 
 private
    -- A block of 64 bits contains 8 octets.
    Block_Size : constant U8 := 8;
-   -- An unpacked 64-bit integer correspond to a sequence of 8 bytes.
+   -- An unpacked 64-bit integer corresponds to a sequence of 8 bytes.
    subtype U64_Unpacked is Byte_Sequence (U64 range 1..8);
 
    ---------------------------------------------------------------------
    -- Pack_As_LE
    --
    -- Purpose:
-   --   Converts an 8-bit sequence into a little-endian 64-bit word.
+   --   Packs a 64-bit integer using the little-endian encoding.
    -- Parameters:
-   --   Input: an 8-bit sequence.
+   --   Input: an unpacked 64-bit integer.
    -- Return:
-   --   Returns a little-endian 64-bit word.
+   --   Returns a 64-bit little-endian integer.
    -- Exceptions:
    --   None.
    ---------------------------------------------------------------------

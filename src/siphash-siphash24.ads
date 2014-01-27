@@ -30,52 +30,25 @@
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
--- SipHash
+-- SipHash.SipHash24
 --
--- Implementation Notes:
---   This package implements utility functions.
---
--- Portability Issues:
---   - 64-bit integers are required.
+-- Purpose:
+--   This package provides an implementation of SipHash-2-4.
 ------------------------------------------------------------------------
-package body SipHash is
+package SipHash.SipHash24 is
    ---------------------------------------------------------------------
-   -- Pack_As_LE
-   ---------------------------------------------------------------------
-   function Pack_As_LE(Input : in U64_Unpacked)
-     return U64 is
-   begin
-      return           U64(Input(1))      or
-            Shift_Left(U64(Input(2)),  8) or
-            Shift_Left(U64(Input(3)), 16) or
-            Shift_Left(U64(Input(4)), 24) or
-            Shift_Left(U64(Input(5)), 32) or
-            Shift_Left(U64(Input(6)), 40) or
-            Shift_Left(U64(Input(7)), 48) or
-            Shift_Left(U64(Input(8)), 56);
-   end Pack_As_LE;
-
-   ---------------------------------------------------------------------
-   -- Sip_Round
+   -- Hash
    --
-   -- Implementation Notes:
-   --   Operations are ordered in a way that reduce data dependancies.
+   -- Purpose:
+   --   Computes the hash of the input using the specified 128-bit key.
+   -- Parameters:
+   --   Input: data to hash.
+   --   Key:   a 128-bit key.
+   -- Return:
+   --   Returns the hash value.
+   -- Exceptions:
+   --   None.
    ---------------------------------------------------------------------
-   procedure Sip_Round(V0, V1, V2, V3 : in out U64) is
-   begin
-      V0 := V0 + V1;
-      V2 := V2 + V3;
-      V1 := Rotate_Left(V1, 13);
-      V3 := Rotate_Left(V3, 16);
-      V1 := V1 xor V0;
-      V3 := V3 xor V2;
-      V0 := Rotate_Left(V0, 32);
-      V2 := V2 + V1;
-      V0 := V0 + V3;
-      V1 := Rotate_Left(V1, 17);
-      V3 := Rotate_Left(V3, 21);
-      V1 := V1 xor V2;
-      V3 := V3 xor V0;
-      V2 := Rotate_Left(V2, 32);
-   end Sip_Round;
-end SipHash;
+   function Hash(Input : in Byte_Sequence; Key : in Key_Type)
+     return U64;
+end SipHash.SipHash24;

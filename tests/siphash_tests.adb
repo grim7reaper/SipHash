@@ -30,6 +30,7 @@
 ------------------------------------------------------------------------
 with Ada.Text_IO;
 with SipHash;
+with SipHash.SipHash24;
 
 ---------------------------------------------------------------------
 -- SipHash_Tests
@@ -45,7 +46,8 @@ with SipHash;
 --      (https://131002.net/siphash/siphash24.c)
 ---------------------------------------------------------------------
 procedure SipHash_Tests is
-   package T_IO renames Ada.Text_IO;
+   package SipHash24 renames SipHash.SipHash24;
+   package T_IO      renames Ada.Text_IO;
    package M_IO is new T_IO.Modular_IO(SipHash.U64);
 
    use type SipHash.U64;
@@ -77,7 +79,7 @@ procedure SipHash_Tests is
       Expected_Output : constant SipHash.U64 := 16#a129ca6149be45e5#;
       Result : SipHash.U64;
    begin
-      Result := SipHash.SipHash_24(Input, Key);
+      Result := SipHash24.Hash(Input, Key);
       if Result /= Expected_Output then
          T_IO.Put("Test_Paper failed: ");
          M_IO.Put(Expected_Output, Base => 16);
@@ -109,7 +111,7 @@ procedure SipHash_Tests is
       Expected_Output : constant SipHash.U64 := 16#726fdb47dd0e0e31#;
       Result : SipHash.U64;
    begin
-      Result := SipHash.SipHash_24(Empty_Input, Key);
+      Result := SipHash24.Hash(Empty_Input, Key);
       if Result /= Expected_Output then
          T_IO.Put("Test_Empty_Input failed: ");
          M_IO.Put(Expected_Output, Base => 16);
@@ -173,7 +175,7 @@ procedure SipHash_Tests is
       -- Input = 00 01 02 ... 3e (63 bytes)
       for I in Input'Range loop
          Input(I) := SipHash.U8(I-1);
-         Result   := SipHash.SipHash_24(Input(1..I), Key);
+         Result   := SipHash24.Hash(Input(1..I), Key);
          if Result /= Expected(I) then
             T_IO.Put("Test_Reference_Implementation failed for"
               & SipHash.U64'Image(I) & " bytes: ");
