@@ -1,8 +1,12 @@
 BUILD_MODE=debug
 
-.PHONY: tests clean
+.PHONY: clean
 
 all: tests
+
+run_tests : tests
+	./bin/tests-block_interface
+	./bin/tests-streaming_interface
 
 tests: block streaming
 

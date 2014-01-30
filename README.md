@@ -32,21 +32,24 @@ SipHash already include FreeBSD, OpenDNS, Perl 5, Ruby, or Rust.
 
 --------------------------------------------------------------------------------
 
+## Usage
+
+
 ## Compilation
 
 In debug mode:
 
-    $ gnatmake -Psiphash
+    $ make
 
 In release mode:
 
-    $ gnatmake -Psiphash -Xmode=release
+    $ make BUILD_MODE=release
 
 ## Testing
 
 To run the tests:
 
-    $ ./bin/siphash_tests
+    $ make run_tests
 
 ## Reference
 
