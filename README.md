@@ -34,6 +34,25 @@ SipHash already include FreeBSD, OpenDNS, Perl 5, Ruby, or Rust.
 
 ## Usage
 
+Block interface:
+
+    package SipHash24 renames SipHash.SipHash24;
+    […]
+    Output := SipHash24.Hash(Input, Key);
+
+Streaming interface:
+      
+    package SipHash24 renames SipHash.SipHash24;
+    […]
+    -- Initialization with the 128-bit secret key.
+    Hash : SipHash24.Object := SipHash24.Initialize(Key);
+    […]
+    -- Processing of each byte of the input.
+    for I in Input'Range loop
+       SipHash24.Update(Hash, Input(I));
+    end loop;
+    -- Finalization to compute the hash value.
+    SipHash24.Finalize(Hash, Output);
 
 ## Compilation
 
