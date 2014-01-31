@@ -126,9 +126,7 @@ procedure Tests.Streaming_Interface is
       -- Input = 00 01 02 ... 3e (63 bytes)
       for I in Input'Range loop
          Input(I) := SipHash.U8(I-1);
-         for J in Input'First .. I loop
-            SipHash24.Update(Hash, Input(J));
-         end loop;
+         SipHash24.Update(Hash, Input(Input'First .. I));
          SipHash24.Finalize(Hash, Result);
          if Result /= C_Ref_Output(I) then
             Put_Error("Test_Reference_Implementation",

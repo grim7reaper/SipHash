@@ -58,7 +58,7 @@ package body SipHash.SipHash24 is
    --   The bytes are accumulated into `Block`. Once we get 8 bytes,
    --   `Block` is processed and then cleared.
    ---------------------------------------------------------------------
-   procedure Update(Hash: in out Object; Byte : in U8) is
+   procedure Update(Hash : in out Object; Byte : in U8) is
       Offset : U8 := (Hash.Block_Index - 1) * Block_Size;
    begin
       Hash.Block := Hash.Block or Shift_Left(U64(Byte), Integer(Offset));
@@ -72,6 +72,16 @@ package body SipHash.SipHash24 is
          Hash.Block       := 0;
          Hash.Block_Index := 1;
       end if;
+   end Update;
+
+   ---------------------------------------------------------------------
+   -- Update
+   ---------------------------------------------------------------------
+   procedure Update(Hash : in out Object; Input : in Byte_Sequence) is
+   begin
+      for I in Input'Range loop
+         Update(Hash, Input(I));
+      end loop;
    end Update;
 
    ---------------------------------------------------------------------

@@ -68,6 +68,19 @@ package SipHash.SipHash24 is
    procedure Update(Hash : in out Object; Byte : in U8);
 
    ---------------------------------------------------------------------
+   -- Update
+   --
+   -- Purpose:
+   --   Add an array of bytes to the hash.
+   -- Parameters:
+   --   Hash: a SipHash-2-4 instance.
+   --   Byte: an array of bytes.
+   -- Exceptions:
+   --   None.
+   ---------------------------------------------------------------------
+   procedure Update(Hash : in out Object; Input : in Byte_Sequence);
+
+   ---------------------------------------------------------------------
    -- Finalize
    --
    -- Purpose:
