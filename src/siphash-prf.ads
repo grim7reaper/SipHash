@@ -28,26 +28,31 @@
 --  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 --  OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------
+generic
+   -- Number of compression rounds
+   Nb_Compression_Rounds  : Positive;
+   -- Number of finalization rounds.
+   Nb_Finalization_Rounds : Positive;
 
 ------------------------------------------------------------------------
--- SipHash.SipHash24
+-- SipHash.PRF
 --
 -- Purpose:
---   This package provides an implementation of SipHash-2-4.
+--   This package provides an implementation of the SipHash PRF.
 ------------------------------------------------------------------------
-package SipHash.SipHash24 is
+package SipHash.PRF is
    type Object is limited private;
 
    ---------------------------------------------------------------------
    -- Initialize
    --
    -- Purpose:
-   --   Creates a SipHash-2-4 instance, initialized with the specified
-   --   128-bit secret key.
+   --   Initializes a SipHash instance with the specified 128-bit secret
+   --   key.
    -- Parameters:
    --   Key: a 128-bit secret key.
    -- Return:
-   --   Returns an initialized SipHash-2-4 instance.
+   --   Returns an initialized SipHash instance.
    -- Exceptions:
    --   None.
    ---------------------------------------------------------------------
@@ -60,7 +65,7 @@ package SipHash.SipHash24 is
    -- Purpose:
    --   Add a byte to the hash.
    -- Parameters:
-   --   Hash: a SipHash-2-4 instance.
+   --   Hash: a SipHash instance.
    --   Byte: a byte of data.
    -- Exceptions:
    --   None.
@@ -73,7 +78,7 @@ package SipHash.SipHash24 is
    -- Purpose:
    --   Add an array of bytes to the hash.
    -- Parameters:
-   --   Hash: a SipHash-2-4 instance.
+   --   Hash: a SipHash instance.
    --   Byte: an array of bytes.
    -- Exceptions:
    --   None.
@@ -86,7 +91,7 @@ package SipHash.SipHash24 is
    -- Purpose:
    --   Runs the finalization round and computes the hash value.
    -- Parameters:
-   --   Hash:   a SipHash-2-4 instance.
+   --   Hash:   a SipHash instance.
    --   Result: the hash value.
    -- Exceptions:
    --   None.
@@ -101,7 +106,7 @@ package SipHash.SipHash24 is
    -- Purpose:
    --   Re-Initializes the internal state.
    -- Parameters:
-   --   Hash: a SipHash-2-4 instance.
+   --   Hash: a SipHash instance.
    --   Key:  a 128-bit secret key.
    -- Remarks:
    --   The current state is lost.
@@ -141,4 +146,4 @@ private
          -- Processed bytes' counter (modulo 256)
          Count       : U8;
       end record;
-end SipHash.SipHash24;
+end SipHash.PRF;

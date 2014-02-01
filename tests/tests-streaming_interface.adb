@@ -29,10 +29,10 @@
 --  OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------
 with Ada.Text_IO;
-with SipHash.SipHash24;
+with SipHash.PRF;
 
 ---------------------------------------------------------------------
--- Tests.Streamin_Interface
+-- Tests.Streaming_Interface
 --
 -- Purpose:
 --   This procedure tests the Streaming interface of SipHash.
@@ -45,8 +45,9 @@ with SipHash.SipHash24;
 --      (https://131002.net/siphash/siphash24.c)
 ---------------------------------------------------------------------
 procedure Tests.Streaming_Interface is
-   package SipHash24 renames SipHash.SipHash24;
-   package T_IO      renames Ada.Text_IO;
+   package T_IO renames Ada.Text_IO;
+   package SipHash24 is new SipHash.PRF(Nb_Compression_Rounds  => 2,
+                                        Nb_Finalization_Rounds => 4);
 
    ---------------------------------------------------------------------
    -- Test_Paper
