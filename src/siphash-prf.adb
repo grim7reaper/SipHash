@@ -30,17 +30,16 @@
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
--- SipHash.SipHash24
+-- SipHash.PRF
 --
 -- Implementation Notes:
---   This package implements SipHash-2-4 using multiple call to
---   Sip_Round instead of a loop.
+--   This package implements the SipHash PRF.
 --
 -- Portability Issues:
 --   - 64-bit integers are required.
 --   - Depends on little-endian encoding?
 ------------------------------------------------------------------------
-package body SipHash.SipHash24 is
+package body SipHash.PRF is
    ---------------------------------------------------------------------
    -- Initialize
    ---------------------------------------------------------------------
@@ -66,8 +65,9 @@ package body SipHash.SipHash24 is
       Hash.Block_Index := Hash.Block_Index + 1;
       if Hash.Block_Index > Block_Size then
          Hash.V3 := Hash.V3 xor Hash.Block;
-         Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
-         Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+         for I in 1 .. Nb_Compression_Rounds loop
+            Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+         end loop;
          Hash.V0 := Hash.V0 xor Hash.Block;
          Hash.Block       := 0;
          Hash.Block_Index := 1;
@@ -102,10 +102,9 @@ package body SipHash.SipHash24 is
       end loop;
       update(Hash, Nb_Bytes_Hashed);
       Hash.V2 := Hash.V2 xor 16#ff#;
-      Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
-      Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
-      Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
-      Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+      for I in 1 .. Nb_Finalization_Rounds loop
+         Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+      end loop;
       Result := Hash.V0 xor Hash.V1 xor Hash.V2 xor Hash.V3;
    end Finalize;
 
@@ -139,4 +138,4 @@ package body SipHash.SipHash24 is
       Finalize(Hash, Result);
       return Result;
    end Hash;
-end SipHash.SipHash24;
+end SipHash.PRF;

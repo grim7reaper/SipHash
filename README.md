@@ -1,7 +1,6 @@
 # SipHash: a fast short-input PRF
 
-This is a pure Ada implementation of the SipHash PRF (currently, only
-SipHash-2-4 is implemented).
+This is a pure Ada implementation of the SipHash PRF.
 
 It is based on the original paper and tested against the test values provided in
 the paper and in the reference C implementation.
@@ -36,23 +35,29 @@ SipHash already include FreeBSD, OpenDNS, Perl 5, Ruby, or Rust.
 
 Block interface:
 
-    package SipHash24 renames SipHash.SipHash24;
+    with SipHash.PRF;
+    […]
+    package SipHash24 is new SipHash.PRF(Nb_Compression_Rounds  => 2,
+                                         Nb_Finalization_Rounds => 4);
     […]
     Output := SipHash24.Hash(Input, Key);
 
 Streaming interface:
       
-    package SipHash24 renames SipHash.SipHash24;
+    with SipHash.PRF;
+    […]
+    package SipHash24 is new SipHash.PRF(Nb_Compression_Rounds  => 4,
+                                         Nb_Finalization_Rounds => 8);
     […]
     -- Initialization with the 128-bit secret key.
-    Hash : SipHash24.Object := SipHash24.Initialize(Key);
+    Hash : SipHash48.Object := SipHash48.Initialize(Key);
     […]
     -- Processing of each byte of the input.
     for I in Input'Range loop
-       SipHash24.Update(Hash, Input(I));
+       SipHash48.Update(Hash, Input(I));
     end loop;
     -- Finalization to compute the hash value.
-    SipHash24.Finalize(Hash, Output);
+    SipHash48.Finalize(Hash, Output);
 
 ## Compilation
 
@@ -84,4 +89,4 @@ J.-P. Aumasson and D. J. Bernstein,
 
 This software is licensed under the BSD3 license.
 
-© 2014 Sylvain Laperche <sylvain.laperche@gmail.com>.
+Copyright (c) 2014, Sylvain Laperche <sylvain.laperche@gmail.com>
