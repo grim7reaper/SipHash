@@ -46,7 +46,7 @@ Streaming interface:
       
     with SipHash.PRF;
     […]
-    package SipHash24 is new SipHash.PRF(Nb_Compression_Rounds  => 4,
+    package SipHash48 is new SipHash.PRF(Nb_Compression_Rounds  => 4,
                                          Nb_Finalization_Rounds => 8);
     […]
     -- Initialization with the 128-bit secret key.
