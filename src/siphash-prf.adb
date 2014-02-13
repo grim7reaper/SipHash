@@ -78,8 +78,44 @@ package body SipHash.PRF is
    -- Update
    ---------------------------------------------------------------------
    procedure Update(Hash : in out Object; Input : in Byte_Sequence) is
+      Offset : U64 := Input'First;
    begin
-      for I in Input'Range loop
+      --------------------------------------------
+      -- Finish the current block if necessary. --
+      --------------------------------------------
+      if Hash.Block_Index /= 1 then
+         for I in Hash.Block_Index .. Block_Size loop
+            Update(Hash, Input(Offset));
+            Offset := Offset + 1;
+         end loop;
+      end if;
+      ---------------------------------
+      -- Process the input by block. --
+      ---------------------------------
+      declare
+         Nb_Blocks : constant I64 :=
+            I64((Input'Length-(Offset-Input'First)) / U64(Block_Size));
+      begin
+         for I in 0 .. Nb_Blocks-1 loop
+            declare
+               Stop  : U64 := Offset + U64(Block_Size) - 1;
+            begin
+               Hash.Block := Pack_As_LE(Input(Offset..Stop));
+               Hash.Count := Hash.Count + Block_Size;
+               Hash.V3    := Hash.V3 xor Hash.Block;
+               for I in 1 .. Nb_Compression_Rounds loop
+                  Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+               end loop;
+               Hash.V0    := Hash.V0 xor Hash.Block;
+               Offset     := Offset + U64(Block_Size);
+            end;
+         end loop;
+         Hash.Block := 0;
+      end;
+      -------------------------------------------------------
+      -- Process the last block of the input if necessary. --
+      -------------------------------------------------------
+      for I in Offset .. Input'Last loop
          Update(Hash, Input(I));
       end loop;
    end Update;
@@ -178,5 +214,4 @@ package body SipHash.PRF is
       V3 := V3 xor V0;
       V2 := Rotate_Left(V2, 32);
    end Sip_Round;
-
 end SipHash.PRF;
