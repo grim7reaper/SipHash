@@ -76,22 +76,30 @@ package body SipHash.PRF is
 
    ---------------------------------------------------------------------
    -- Update
+   -- Implementation Notes:
+   --   This procedure executes the following operations:
+   --   1. Hash enough bytes of the input to finish the current block
+   --      (if a block is in process).
+   --   2. Hash the remaining of the input block by block (not octet by
+   --      octet).
+   --   3. Hash the last bytes of the input one by one (if the size of
+   --      the input is not a multiple of the block size).
    ---------------------------------------------------------------------
    procedure Update(Hash : in out Object; Input : in Byte_Sequence) is
       Offset : U64 := Input'First;
    begin
-      --------------------------------------------
-      -- Finish the current block if necessary. --
-      --------------------------------------------
+      -- Step 1.
       if Hash.Block_Index /= 1 then
-         for I in Hash.Block_Index .. Block_Size loop
-            Update(Hash, Input(Offset));
-            Offset := Offset + 1;
-         end loop;
+         declare
+            Nb_Remain : U64 := U64(Block_Size - Hash.Block_Index) + 1;
+         begin
+            for I in 1 .. U64'Min(Input'Length, Nb_Remain) loop
+               Update(Hash, Input(Offset));
+               Offset := Offset + 1;
+            end loop;
+         end;
       end if;
-      ---------------------------------
-      -- Process the input by block. --
-      ---------------------------------
+      -- Step 2.
       declare
          Nb_Blocks : constant I64 :=
             I64((Input'Length-(Offset-Input'First)) / U64(Block_Size));
@@ -109,12 +117,10 @@ package body SipHash.PRF is
                Hash.V0    := Hash.V0 xor Hash.Block;
                Offset     := Offset + U64(Block_Size);
             end;
+            Hash.Block := 0;
          end loop;
-         Hash.Block := 0;
       end;
-      -------------------------------------------------------
-      -- Process the last block of the input if necessary. --
-      -------------------------------------------------------
+      -- Step 3.
       for I in Offset .. Input'Last loop
          Update(Hash, Input(I));
       end loop;
