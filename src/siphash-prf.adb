@@ -139,14 +139,18 @@ package body SipHash.PRF is
    procedure Finalize(Hash : in out Object; Result : out U64) is
       Nb_Bytes_Hashed : constant U8 := Hash.Count;
    begin
+      -- Step 1.
       for I in Hash.Block_Index .. Block_Size-1 loop
          Update(Hash, 0);
       end loop;
-      update(Hash, Nb_Bytes_Hashed);
+      -- Step 2.
+      Update(Hash, Nb_Bytes_Hashed);
+      -- Step 3.
       Hash.V2 := Hash.V2 xor 16#ff#;
       for I in 1 .. Nb_Finalization_Rounds loop
          Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
       end loop;
+      -- Step 4.
       Result := Hash.V0 xor Hash.V1 xor Hash.V2 xor Hash.V3;
    end Finalize;
 
