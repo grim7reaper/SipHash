@@ -76,10 +76,52 @@ package body SipHash.PRF is
 
    ---------------------------------------------------------------------
    -- Update
+   -- Implementation Notes:
+   --   This procedure executes the following operations:
+   --   1. Hash enough bytes of the input to finish the current block
+   --      (if a block is in process).
+   --   2. Hash the remaining of the input block by block (not octet by
+   --      octet).
+   --   3. Hash the last bytes of the input one by one (if the size of
+   --      the input is not a multiple of the block size).
    ---------------------------------------------------------------------
    procedure Update(Hash : in out Object; Input : in Byte_Sequence) is
+      Offset : U64 := Input'First;
    begin
-      for I in Input'Range loop
+      -- Step 1.
+      if Hash.Block_Index /= 1 then
+         declare
+            Nb_Remain : U64 := U64(Block_Size - Hash.Block_Index) + 1;
+         begin
+            for I in 1 .. U64'Min(Input'Length, Nb_Remain) loop
+               Update(Hash, Input(Offset));
+               Offset := Offset + 1;
+            end loop;
+         end;
+      end if;
+      -- Step 2.
+      declare
+         Nb_Blocks : constant I64 :=
+            I64((Input'Length-(Offset-Input'First)) / U64(Block_Size));
+      begin
+         for I in 0 .. Nb_Blocks-1 loop
+            declare
+               Stop  : U64 := Offset + U64(Block_Size) - 1;
+            begin
+               Hash.Block := Pack_As_LE(Input(Offset..Stop));
+               Hash.Count := Hash.Count + Block_Size;
+               Hash.V3    := Hash.V3 xor Hash.Block;
+               for I in 1 .. Nb_Compression_Rounds loop
+                  Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
+               end loop;
+               Hash.V0    := Hash.V0 xor Hash.Block;
+               Offset     := Offset + U64(Block_Size);
+            end;
+            Hash.Block := 0;
+         end loop;
+      end;
+      -- Step 3.
+      for I in Offset .. Input'Last loop
          Update(Hash, Input(I));
       end loop;
    end Update;
@@ -97,14 +139,18 @@ package body SipHash.PRF is
    procedure Finalize(Hash : in out Object; Result : out U64) is
       Nb_Bytes_Hashed : constant U8 := Hash.Count;
    begin
+      -- Step 1.
       for I in Hash.Block_Index .. Block_Size-1 loop
          Update(Hash, 0);
       end loop;
-      update(Hash, Nb_Bytes_Hashed);
+      -- Step 2.
+      Update(Hash, Nb_Bytes_Hashed);
+      -- Step 3.
       Hash.V2 := Hash.V2 xor 16#ff#;
       for I in 1 .. Nb_Finalization_Rounds loop
          Sip_Round(Hash.V0, Hash.V1, Hash.V2, Hash.V3);
       end loop;
+      -- Step 4.
       Result := Hash.V0 xor Hash.V1 xor Hash.V2 xor Hash.V3;
    end Finalize;
 
@@ -132,10 +178,48 @@ package body SipHash.PRF is
       Hash : Object := Initialize(Key);
       Result : U64;
    begin
-      for I in Input'Range loop
-         Update(Hash, Input(I));
-      end loop;
+      Update(Hash, Input);
       Finalize(Hash, Result);
       return Result;
    end Hash;
+
+   ---------------------------------------------------------------------
+   -- Pack_As_LE
+   ---------------------------------------------------------------------
+   function Pack_As_LE(Input : in U64_Unpacked)
+     return U64 is
+   begin
+      return           U64(Input(1))      or
+            Shift_Left(U64(Input(2)),  8) or
+            Shift_Left(U64(Input(3)), 16) or
+            Shift_Left(U64(Input(4)), 24) or
+            Shift_Left(U64(Input(5)), 32) or
+            Shift_Left(U64(Input(6)), 40) or
+            Shift_Left(U64(Input(7)), 48) or
+            Shift_Left(U64(Input(8)), 56);
+   end Pack_As_LE;
+
+   ---------------------------------------------------------------------
+   -- Sip_Round
+   --
+   -- Implementation Notes:
+   --   Operations are ordered in a way that reduce data dependancies.
+   ---------------------------------------------------------------------
+   procedure Sip_Round(V0, V1, V2, V3 : in out U64) is
+   begin
+      V0 := V0 + V1;
+      V2 := V2 + V3;
+      V1 := Rotate_Left(V1, 13);
+      V3 := Rotate_Left(V3, 16);
+      V1 := V1 xor V0;
+      V3 := V3 xor V2;
+      V0 := Rotate_Left(V0, 32);
+      V2 := V2 + V1;
+      V0 := V0 + V3;
+      V1 := Rotate_Left(V1, 17);
+      V3 := Rotate_Left(V3, 21);
+      V1 := V1 xor V2;
+      V3 := V3 xor V0;
+      V2 := Rotate_Left(V2, 32);
+   end Sip_Round;
 end SipHash.PRF;

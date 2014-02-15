@@ -60,7 +60,7 @@ package SipHash is
       Patch : Natural;
    end record;
 
-   Version : constant Version_Type := (0, 3, 0);
+   Version : constant Version_Type := (0, 3, 1);
 
    -- Fixed-width integer types.
    type I64 is new Interfaces.Integer_64;
@@ -84,42 +84,4 @@ package SipHash is
    ---------------------------------------------------------------------
    function Version_String
      return String;
-
-private
-   -- A block of 64 bits contains 8 octets.
-   Block_Size : constant U8 := 8;
-   -- An unpacked 64-bit integer corresponds to a sequence of 8 bytes.
-   subtype U64_Unpacked is Byte_Sequence (U64 range 1..8);
-
-   ---------------------------------------------------------------------
-   -- Pack_As_LE
-   --
-   -- Purpose:
-   --   Packs a 64-bit integer using the little-endian encoding.
-   -- Parameters:
-   --   Input: an unpacked 64-bit integer.
-   -- Return:
-   --   Returns a 64-bit little-endian integer.
-   -- Exceptions:
-   --   None.
-   ---------------------------------------------------------------------
-   function Pack_As_LE(Input : in U64_Unpacked)
-     return U64
-     with Inline;
-
-   ---------------------------------------------------------------------
-   -- Sip_Round
-   --
-   -- Purpose:
-   --   Executes the round function of SipHash.
-   -- Parameters:
-   --   V0: Internal state(0).
-   --   V1: Internal state(1).
-   --   V2: Internal state(2).
-   --   V3: Internal state(3).
-   -- Exceptions:
-   --   None.
-   ---------------------------------------------------------------------
-   procedure Sip_Round(V0, V1, V2, V3 : in out U64)
-     with Inline;
 end SipHash;
