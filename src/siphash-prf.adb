@@ -178,9 +178,7 @@ package body SipHash.PRF is
       Hash : Object := Initialize(Key);
       Result : U64;
    begin
-      for I in Input'Range loop
-         Update(Hash, Input(I));
-      end loop;
+      Update(Hash, Input);
       Finalize(Hash, Result);
       return Result;
    end Hash;
